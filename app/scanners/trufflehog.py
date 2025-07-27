@@ -16,8 +16,8 @@ class TrufflehogScanner:
             command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
         )
 
-        # print("STDOUT:\n", result.stdout)
-        # print("STDERR:\n", result.stderr)
+        print("STDOUT:\n", result.stdout)
+        print("STDERR:\n", result.stderr)
 
         return result.returncode
 
@@ -30,20 +30,20 @@ class TrufflehogScanner:
             return json.load(f)
 
     def normalize_flag(self, name: str) -> str:
-        """Convert env var to CLI flag, e.g., trufflehog_REPORT_PATH → --report-path"""
+        """Convert env var to CLI flag, e.g."""
         if len(name.replace("trufflehog_", "")) == 1:
             return "-" + name.replace("trufflehog_", "").lower()
         else:
             return "--" + name.replace("trufflehog_", "").lower().replace("_", "-")
 
     def build_trufflehog_command(self):
+        # trufflehog git
         base_command = [
             "trufflehog",
             "git",
-            "--report-format",
-            "json",
-            "--report-path",
-            "trufflehog_report_sec-m8.json",
+            "file://. ",
+            "--json",
+            "> trufflehog_report_sec-m8.json",
         ]
         cli_flags = []
 
@@ -52,7 +52,7 @@ class TrufflehogScanner:
                 continue
 
             flag = self.normalize_flag(key)
-            if flag in ["--report-format", "--report-path"]:
+            if flag in ["--json"]:
                 # Skip flags that are already set in base_command
                 continue
             # Boolean flag (true/false) with no value

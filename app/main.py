@@ -1,6 +1,7 @@
 from sys import exit
 from utils.logger import Logger
 from scanners.gitleaks import GitleaksScanner
+from scanners.trufflehog import TrufflehogScanner
 from utils.get_env_variable import get_env_variable
 from utils.handle_report import handle_report
 
@@ -52,7 +53,10 @@ def main():
 
         elif scan_tool == "trufflehog":
             logger.info("Running TruffleHog scan...")
-            # Add TruffleHog scan logic here
+            trufflehogScanner = TrufflehogScanner()
+            if trufflehogScanner.scan():
+                report = trufflehogScanner.report()
+                handle_report("TruffleHog", report, logger)
         else:
             logger.error(f"Unsupported secret scan tool: {scan_tool}")
             exit(2)

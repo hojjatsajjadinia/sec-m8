@@ -125,3 +125,6 @@ secrets/
 *.key
 *.pem
 *.crt
+
+# Ignore python environment 
+.venv/
