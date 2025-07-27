@@ -9,15 +9,22 @@ class TrufflehogScanner:
         pass
 
     def scan(self):
-        command = self.build_trufflehog_command()
-        print("Running trufflehog command:\n", shlex.join(command))  # for debug
+        command = (
+            shlex.join(self.build_trufflehog_command())
+            + " > trufflehog_report_sec-m8.json"
+        )
+        print("Running trufflehog command:\n", command)  # for debug
 
         result = subprocess.run(
-            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            shell=True,
         )
 
         print("STDOUT:\n", result.stdout)
-        print("STDERR:\n", result.stderr)
+        # print("STDERR:\n", result.stderr)
 
         return result.returncode
 
@@ -38,12 +45,21 @@ class TrufflehogScanner:
 
     def build_trufflehog_command(self):
         # trufflehog git
+        # Get current branch name using git
+        try:
+            branch_name = subprocess.check_output(
+                ["git", "rev-parse", "--abbrev-ref", "HEAD"], text=True
+            ).strip()
+        except subprocess.CalledProcessError:
+            branch_name = "HEAD"
+
         base_command = [
             "trufflehog",
             "git",
-            "file://. ",
+            "file://.",
+            "--branch",
+            branch_name,
             "--json",
-            "> trufflehog_report_sec-m8.json",
         ]
         cli_flags = []
 
