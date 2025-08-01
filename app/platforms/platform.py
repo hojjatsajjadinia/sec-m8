@@ -7,7 +7,7 @@ class Platform:
         self.platform_name = platform_name
         self.logger = logger
 
-    def comment_on_merge_request(self, report):
+    def comment_on_merge_request(self, report,tool_name):
         if self.platform_name == "gitlab":
             try:
                 gitlab_url = get_env_variable("GITLAB_URL")
@@ -20,7 +20,7 @@ class Platform:
                 self.logger.error("GITLAB_PRIVATE_TOKEN is not set.")
                 exit(2)
             gitlab = Gitlab(gitlab_url, gitlab_token, self.logger)
-            gitlab.comment_on_merge_request(report)
+            gitlab.comment_on_merge_request(report,tool_name)
 
         else:
             raise NotImplementedError(f"Platform {self.platform_name} not supported.")

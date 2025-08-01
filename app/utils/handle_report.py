@@ -11,7 +11,7 @@ def handle_report(tool_name, report, logger):
     if get_env_variable("PR_COMMENT", "false").lower() in ("1", "true", "yes"):
         logger.info(f"Posting {tool_name} report to PR comment.")
         platform = Platform(detect_ci(), logger)
-        platform.comment_on_merge_request(report)
+        platform.comment_on_merge_request(report,tool_name)
 
     elif get_env_variable("PRINT_REPORT", "false").lower() in ("1", "true", "yes"):
         logger.info(f"Printing {tool_name} report to log.")

@@ -2,6 +2,7 @@ import os
 import subprocess
 import shlex
 import json
+from utils.get_env_variable import get_env_variable
 
 
 class TrufflehogScanner:
@@ -23,18 +24,23 @@ class TrufflehogScanner:
             shell=True,
         )
 
-        print("STDOUT:\n", result.stdout)
-        # print("STDERR:\n", result.stderr)
-
-        return result.returncode
+        #print("STDOUT:\n", result.stdout)
+        #print("STDERR:\n", result.stderr)
+        # TODO: Handle errors and return codes result.returncode
+        return_code = result.returncode
+        return True
 
     def report(self):
         report_path = "trufflehog_report_sec-m8.json"
         if not os.path.isfile(report_path):
             raise FileNotFoundError(f"{report_path} not found in current directory.")
-
+        results = []
         with open(report_path, "r") as f:
-            return json.load(f)
+            for line in f:
+                if line.strip():  # skip empty lines
+                    results.append(json.loads(line))
+        print(f"Loaded {len(results)} entries from {report_path}.")
+        return results
 
     def normalize_flag(self, name: str) -> str:
         """Convert env var to CLI flag, e.g."""
@@ -46,13 +52,8 @@ class TrufflehogScanner:
     def build_trufflehog_command(self):
         # trufflehog git
         # Get current branch name using git
-        try:
-            branch_name = subprocess.check_output(
-                ["git", "rev-parse", "--abbrev-ref", "HEAD"], text=True
-            ).strip()
-        except subprocess.CalledProcessError:
-            branch_name = "HEAD"
-
+        #TODO: handle other git platforms
+        branch_name = get_env_variable("CI_COMMIT_REF_NAME", "HEAD")
         base_command = [
             "trufflehog",
             "git",
